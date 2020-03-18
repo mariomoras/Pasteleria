@@ -229,7 +229,10 @@ switch ($mtd) {
     case "verCarrito":
         session_start();
         $nIdUsuario = $_SESSION["usuario"]["id"];
-        $sqlPo = $pdo->prepare("SELECT t1.nIdCarrito, t1.nId_Postre, t2.cNombre,t3.cNombreNegocio, t2.nPrecio, t1.nCantidad, SUM(t1.nCantidad * t2.nPrecio) AS nTotal FROM tblcarritocompras t1 INNER JOIN catpostre t2 ON t1.nId_Postre = t2.nIdPostre INNER JOIN tblcliente t3 ON t2.nIdClienteRegistro = t3.nIdCliente WHERE t1.cEstatus is null and t1.nId_Usuario = :n1 GROUP By t1.nIdCarrito ORDER By t3.cNombreNegocio");
+        $sqlPo = $pdo->prepare("SELECT t1.nIdCarrito, t1.nId_Postre, t2.cNombre,t3.cNombreNegocio, t2.nPrecio, t1.nCantidad, "
+                . "SUM(t1.nCantidad * t2.nPrecio) AS nTotal FROM tblcarritocompras t1 "
+                . "INNER JOIN catpostre t2 ON t1.nId_Postre = t2.nIdPostre INNER JOIN tblcliente t3 ON t2.nIdClienteRegistro = t3.nIdCliente "
+                . "WHERE t1.cEstatus is null and t1.nId_Usuario = :n1 GROUP By t1.nIdCarrito ORDER By t3.cNombreNegocio");
         $sqlPo->bindParam("n1", $nIdUsuario, PDO::PARAM_INT);
         $sqlPo->execute();
         $rsqlPo = $sqlPo->fetchAll();
@@ -261,18 +264,18 @@ switch ($mtd) {
 function listarCarrito($rsqlPo) {
     if(Count($rsqlPo) >= 1){
     $total=0;
-    $txt = '<thead class="bg-info text-white"><tr><th scope="col">Vendedor</th><th scope="col">Producto</th><th scope="col">$-pz</th>'
+    $txt = '<thead class="bg-info text-white"><tr><th scope="col">Vendedor</th><th scope="col">Producto</th><th scope="col">pz</th>'
             . '<th scope="col">Cantidad</th><th scope="col">Total</th><th scope="col"><a>Acciones</a></th></tr></thead><tbody>';
     foreach ($rsqlPo as $item) {
         $total= $total+$item["nTotal"];
         $txt .= '<tr><th>' . $item["cNombreNegocio"] . '</th>'
                 . '<th><form id="frmPostre' . $item["nIdCarrito"] . '" action="receipe-post.php" method="POST"><input type="hidden" name="nId_Postre" value="' . $item["nId_Postre"] . '"/><a style="cursor:pointer;" onclick="document.getElementById(' . "'frmPostre" . $item["nIdCarrito"] . "'" . ').submit();" title="Clic para ir al postre/Editar">' . $item["cNombre"] . '</a></form></th>'
-                . '<th>' . $item["nPrecio"] . '</th>'
+                . '<th> $' . $item["nPrecio"] . '</th>'
                 . '<th>' . $item["nCantidad"] . '</th>'
-                . '<th>' . $item["nTotal"] . '</th>'
+                . '<th> $' . $item["nTotal"] . '</th>'
                 . '<th><button class="btn btn-sm btn-outline-warning mr-1" title="Ve al postre y edita la cantidad"><i class="fa fa-edit"></i></button><button onclick="eliminarItem(' . $item["nIdCarrito"] . ');" class="btn btn-sm btn-outline-danger ml-1" title="Eliminar"><i class="fa fa-trash"></i></button></th></tr>';
     }
-    $txt .= '<tr><th colspan="4"></th><th colspan="1">Total: '.$total.'</th><th colspan="1"><button class="btn-sm btn btn-outline-info"><i class="fa fa-money"></i> Pagar</button></th></tr>';
+    $txt .= '<tr><th colspan="4"></th><th colspan="1">Total: $'.$total.'</th><th colspan="1"><button class="btn-sm btn btn-outline-info"><i class="fa fa-money"></i> Pagar</button></th></tr>';
     $txt .= '<tbody>';
     echo $txt;}else{
         echo '<a>No tienes nada en el carrito</a>';
